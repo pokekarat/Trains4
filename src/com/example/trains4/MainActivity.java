@@ -10,8 +10,10 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
@@ -50,6 +52,7 @@ public class MainActivity extends ActionBarActivity
 		
 		WiFi.init(MainActivity.this);
 		
+		
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		
@@ -71,6 +74,9 @@ public class MainActivity extends ActionBarActivity
 						startProcess();
 		        }    	
 		}
+		
+		Screen screen = new Screen(this);
+		setContentView(screen);
 		    
 	}
 		
