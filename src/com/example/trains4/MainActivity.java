@@ -13,7 +13,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.SystemClock;
+import android.view.Display;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
@@ -54,15 +54,15 @@ public class MainActivity extends ActionBarActivity
 		
 		
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);	
 		
-		
-		
-		Battery.main = MainActivity.this;
-		
-		
+		Battery.main = MainActivity.this;	    
 		Intent intent = getIntent();
 		Bundle bundle = intent.getExtras();
+		
+		View v = this.findViewById(R.id.AbsoluteLayout1);
+		//v.setBackgroundColor(Color.rgb(1, 1, 1));
+		Screen._view = v;
 		
 		if (bundle != null) 
 		{
@@ -73,11 +73,7 @@ public class MainActivity extends ActionBarActivity
 		        	if(!Config.processing)
 						startProcess();
 		        }    	
-		}
-		
-		Screen screen = new Screen(this);
-		setContentView(screen);
-		    
+		}   
 	}
 		
 	public class CustomOnItemSelectedLister implements OnItemSelectedListener {
@@ -107,8 +103,8 @@ public class MainActivity extends ActionBarActivity
 		}
 	}
 	
-	public void initSet(){
-		
+	public void initSet()
+	{
 		try 
  		{
  			process = Runtime.getRuntime().exec("su");
@@ -116,34 +112,51 @@ public class MainActivity extends ActionBarActivity
  			
  			try {
  				
- 				/*dos.writeBytes("chmod 777 /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_cur_freq" + "\n");
+ 				dos.writeBytes("chmod 777 /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_cur_freq" + "\n");
  				dos.writeBytes("chmod 777 /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq" + "\n");
  				dos.writeBytes("chmod 777 /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq" + "\n");
  				dos.writeBytes("chmod 777 /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor" + "\n");
  				
-
- 				String governor = "powersave";
+ 				String governor = "ondemand";
  				dos.writeBytes("echo '"+governor+"' > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor" + "\n");
- 				//dos.writeBytes("echo 800000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq" + "\n");
- 				//dos.writeBytes("echo 800000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq" + "\n");*/
- 				dos.writeBytes("chmod 777 /sys/class/backlight/panel/brightness"+"\n");
- 				dos.writeBytes("echo 100 > /sys/class/backlight/panel/brightness"+"\n");
- 				/*dos.writeBytes("exit\n");
+ 				
+ 				if(Config.DUT == 2)
+ 				{
+ 					dos.writeBytes("echo 250000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq" + "\n");
+ 					dos.writeBytes("echo 1400000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq" + "\n");
+ 					dos.writeBytes("chmod 777 /sys/class/backlight/panel/brightness"+"\n");
+ 					dos.writeBytes("echo 255 > /sys/class/backlight/panel/brightness"+"\n");
+ 					dos.writeBytes("chmod 777 /dev/bL_status" + "\n");
+ 	 				
+ 				}
+ 				else if(Config.DUT == 1)
+ 				{
+ 					dos.writeBytes("echo 200000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq" + "\n");
+ 					dos.writeBytes("echo 1000000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq" + "\n");
+ 					dos.writeBytes("chmod 777 /sys/class/backlight/s5p_bl/brightness"+"\n");
+ 					dos.writeBytes("echo 255 >  /sys/class/backlight/s5p_bl/brightness"+"\n");
+ 				}
+ 				
+ 				
+ 				
+ 				dos.writeBytes("exit\n");
  				dos.flush();
  				dos.close();
- 				process.waitFor();*/
+ 				process.waitFor();
 			 
  			} catch (IOException e) {
  				
  				e.printStackTrace();
  			}
- 			
+ 			catch (InterruptedException e) {
+				
+				e.printStackTrace();
+			}
  		} 
  		catch (IOException e) {
  			
  			e.printStackTrace();
  		}
-		
 	}
 	
 	public void startProcess()
@@ -159,9 +172,11 @@ public class MainActivity extends ActionBarActivity
 				case 0:
 				
 				this.initSet();
+				
 				ExternalMeasureTask externalTask = new ExternalMeasureTask(this.extraValue, ui);
 				externalTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, minBatt);
 				
+			
 				break;
 				
 				case 1:

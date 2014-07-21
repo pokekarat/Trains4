@@ -48,21 +48,7 @@ public class FileMgr {
 	public static double cpuIdleTime = 0;
 	public static double cpuIdleUsage = 0;
 	public static double cpuCompute = 0;
-	
-	public static double cpuUtilNum[] = new double[4];
-	public static String cpuUtil[] = new String[4];
-	public static double cpuFreqData[] = new double[4];
-	
-	public static double[][] cpuIdleTimes = new double[4][3];
-	public static double[][] cpuIdleEntrys = new double[4][3];
-	
-	public static long[][] prevCpuIdleTimes = new long[4][3];
-	public static long[][] prevCpuIdleEntrys = new long[4][3];
-	
-	public static int[] cpuOnlineStatus = new int[4];
-	
-	public static String cpuFrePath[] = new String[4];
-		
+			
 	public static double brightData = 0;
 	public static String governData = "";
 	public static double voltData = 0;
@@ -72,17 +58,8 @@ public class FileMgr {
 	public static String cacheUse = "";
 	public static int txPacket = 0;
 	public static int rxPacket = 0;
-	
-	//Nexus s
+
 	static String cpuUtilPath = "/proc/stat";
-	
-	/*static String cpuIdlePowerPath = "/sys/devices/system/cpu/cpu0/cpuidle/state0/power";
-	static String cpuIdleTimePath = "/sys/devices/system/cpu/cpu0/cpuidle/state0/time";
-	static String cpuIdleUsagePath = "/sys/devices/system/cpu/cpu0/cpuidle/state0/usage";*/
-	
-	public static String [][] cpuIdleTimePath = new String[4][3];
-	public static String [][] cpuIdleEntryPath = new String[4][3];
-	public static String [] cpuOnlineStatusPath = new String[4];
 	static String gPath = "/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor";
 	static String vPath = "/sys/class/power_supply/battery/voltage_now";
 	static String tPath = "/sys/class/power_supply/battery/temp";
@@ -91,66 +68,132 @@ public class FileMgr {
 	static String rxPath = "/sys/class/net/wlan0/statistics/rx_packets";
 
 	public static String bPath = "/sys/class/backlight/panel/brightness";
+	public static String blStatusPath = "/dev/bL_status";
 	
-	public static void init(){
+	
+	public static double cpuUtilNum[];// = new double[4];
+	public static String cpuUtil[];// = new String[4];
+	public static double cpuFreqData[];// = new double[4];
+	
+	public static double[][] cpuIdleTimes;// = new double[4][3];
+	public static double[][] cpuIdleEntrys;// = new double[4][3];
+	
+	public static long[][] prevCpuIdleTimes;// = new long[4][3];
+	public static long[][] prevCpuIdleEntrys;// = new long[4][3];
+	
+	public static String [][] cpuIdleTimePath;// = new String[4][3];
+	public static String [][] cpuIdleEntryPath;// = new String[4][3];
+	public static String [] cpuOnlineStatusPath;// = new String[4];
+	
+	public static int[] cpuOnlineStatus;// = new int[4];
+	
+	public static String cpuFrePath[];// = new String[4];
+	
+	public static String[] bL_status = new String[2];
+	
+	
+	
+	public static void initArrays(int core, int state){
 		
-		//S4
-		bPath = "/sys/class/backlight/panel/brightness";
-		cpuFrePath[0] = "/sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq";
-		cpuFrePath[1] = "/sys/devices/system/cpu/cpu1/cpufreq/scaling_cur_freq";
-		cpuFrePath[2] = "/sys/devices/system/cpu/cpu2/cpufreq/scaling_cur_freq";
-		cpuFrePath[3] = "/sys/devices/system/cpu/cpu3/cpufreq/scaling_cur_freq";
+		cpuUtilNum = new double[Config.numCore];
+		cpuUtil = new String[Config.numCore];
+		cpuFreqData = new double[Config.numCore];
+		cpuIdleTimes = new double[Config.numCore][Config.numIdleState];
+		cpuIdleEntrys = new double[Config.numCore][Config.numIdleState];
+		prevCpuIdleTimes = new long[Config.numCore][Config.numIdleState];;
+		prevCpuIdleEntrys = new long[Config.numCore][Config.numIdleState];;
+		cpuIdleTimePath = new String[Config.numCore][Config.numIdleState];
+		cpuIdleEntryPath = new String[Config.numCore][Config.numIdleState];
+		cpuOnlineStatusPath = new String[Config.numCore];
+		cpuOnlineStatus = new int[Config.numCore];
+		cpuFrePath = new String[Config.numCore];
 		
-		cpuOnlineStatusPath[0] = "/sys/devices/system/cpu/cpu0/online";
-		cpuOnlineStatusPath[1] = "/sys/devices/system/cpu/cpu1/online";
-		cpuOnlineStatusPath[2] = "/sys/devices/system/cpu/cpu2/online";
-		cpuOnlineStatusPath[3] = "/sys/devices/system/cpu/cpu3/online";
+	}
+	
+	public static void init()
+	{
 		
-		//CPU0 idle time state 0,1,2
-		cpuIdleTimePath[0][0] = "/sys/devices/system/cpu/cpu0/cpuidle/state0/time";
-		cpuIdleTimePath[0][1] = "/sys/devices/system/cpu/cpu0/cpuidle/state1/time";
-		cpuIdleTimePath[0][2] = "/sys/devices/system/cpu/cpu0/cpuidle/state2/time";
+		if(Config.DUT == 1)
+		{
+			Config.numCore = 1;
+			Config.numIdleState = 1;
+			bPath = "/sys/class/backlight/s5p_bl/brightness";
+			
+			FileMgr.initArrays(Config.numCore, Config.numIdleState);
+			
+			cpuFrePath[0] = "/sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq";
+			cpuOnlineStatusPath[0] = "";
+			cpuIdleTimePath[0][0] = "/sys/devices/system/cpu/cpu0/cpuidle/state0/time";
+			cpuIdleEntryPath[0][0] = "/sys/devices/system/cpu/cpu0/cpuidle/state0/usage";
+		}
 		
-		//CPU1 idle time state 0,1,2
-		cpuIdleTimePath[1][0] = "/sys/devices/system/cpu/cpu1/cpuidle/state0/time";
-		cpuIdleTimePath[1][1] = "/sys/devices/system/cpu/cpu1/cpuidle/state1/time";
-		cpuIdleTimePath[1][2] = "/sys/devices/system/cpu/cpu1/cpuidle/state2/time";
-		
-		//CPU2 idle time state 0,1,2
-		cpuIdleTimePath[2][0] = "/sys/devices/system/cpu/cpu2/cpuidle/state0/time";
-		cpuIdleTimePath[2][1] = "/sys/devices/system/cpu/cpu2/cpuidle/state1/time";
-		cpuIdleTimePath[2][2] = "/sys/devices/system/cpu/cpu2/cpuidle/state2/time";
-		
-		//CPU3 idle time state 0,1,2
-		cpuIdleTimePath[3][0] = "/sys/devices/system/cpu/cpu3/cpuidle/state0/time";
-		cpuIdleTimePath[3][1] = "/sys/devices/system/cpu/cpu3/cpuidle/state1/time";
-		cpuIdleTimePath[3][2] = "/sys/devices/system/cpu/cpu3/cpuidle/state2/time";
-		
-		//Idle Entry
-		//CPU0 idle entry state 0,1,2
-		cpuIdleEntryPath[0][0] = "/sys/devices/system/cpu/cpu0/cpuidle/state0/usage";
-		cpuIdleEntryPath[0][1] = "/sys/devices/system/cpu/cpu0/cpuidle/state1/usage";
-		cpuIdleEntryPath[0][2] = "/sys/devices/system/cpu/cpu0/cpuidle/state2/usage";
-		
-		//CPU1 idle entry state 0,1,2
-		cpuIdleEntryPath[1][0] = "/sys/devices/system/cpu/cpu1/cpuidle/state0/usage";
-		cpuIdleEntryPath[1][1] = "/sys/devices/system/cpu/cpu1/cpuidle/state1/usage";
-		cpuIdleEntryPath[1][2] = "/sys/devices/system/cpu/cpu1/cpuidle/state2/usage";
-		
-		//CPU2 idle entry state 0,1,2
-		cpuIdleEntryPath[2][0] = "/sys/devices/system/cpu/cpu2/cpuidle/state0/usage";
-		cpuIdleEntryPath[2][1] = "/sys/devices/system/cpu/cpu2/cpuidle/state1/usage";
-		cpuIdleEntryPath[2][2] = "/sys/devices/system/cpu/cpu2/cpuidle/state2/usage";
-		
-		//CPU3 idle entry state 0,1,2
-		cpuIdleEntryPath[3][0] = "/sys/devices/system/cpu/cpu3/cpuidle/state0/usage";
-		cpuIdleEntryPath[3][1] = "/sys/devices/system/cpu/cpu3/cpuidle/state1/usage";
-		cpuIdleEntryPath[3][2] = "/sys/devices/system/cpu/cpu3/cpuidle/state2/usage";
+		else if(Config.DUT == 2)
+		{
+			Config.numCore = 4;
+			Config.numIdleState = 3;
+			bPath = "/sys/class/backlight/panel/brightness";
+			
+			FileMgr.initArrays(Config.numCore, Config.numIdleState);
+			
+			cpuFrePath[0] = "/sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq";
+			cpuFrePath[1] = "/sys/devices/system/cpu/cpu1/cpufreq/scaling_cur_freq";
+			cpuFrePath[2] = "/sys/devices/system/cpu/cpu2/cpufreq/scaling_cur_freq";
+			cpuFrePath[3] = "/sys/devices/system/cpu/cpu3/cpufreq/scaling_cur_freq";
+			
+			cpuOnlineStatusPath[0] = "/sys/devices/system/cpu/cpu0/online";
+			cpuOnlineStatusPath[1] = "/sys/devices/system/cpu/cpu1/online";
+			cpuOnlineStatusPath[2] = "/sys/devices/system/cpu/cpu2/online";
+			cpuOnlineStatusPath[3] = "/sys/devices/system/cpu/cpu3/online";
+			
+			//CPU0 idle time state 0,1,2
+			cpuIdleTimePath[0][0] = "/sys/devices/system/cpu/cpu0/cpuidle/state0/time";
+			cpuIdleTimePath[0][1] = "/sys/devices/system/cpu/cpu0/cpuidle/state1/time";
+			cpuIdleTimePath[0][2] = "/sys/devices/system/cpu/cpu0/cpuidle/state2/time";
+			
+			//CPU1 idle time state 0,1,2
+			cpuIdleTimePath[1][0] = "/sys/devices/system/cpu/cpu1/cpuidle/state0/time";
+			cpuIdleTimePath[1][1] = "/sys/devices/system/cpu/cpu1/cpuidle/state1/time";
+			cpuIdleTimePath[1][2] = "/sys/devices/system/cpu/cpu1/cpuidle/state2/time";
+			
+			//CPU2 idle time state 0,1,2
+			cpuIdleTimePath[2][0] = "/sys/devices/system/cpu/cpu2/cpuidle/state0/time";
+			cpuIdleTimePath[2][1] = "/sys/devices/system/cpu/cpu2/cpuidle/state1/time";
+			cpuIdleTimePath[2][2] = "/sys/devices/system/cpu/cpu2/cpuidle/state2/time";
+			
+			//CPU3 idle time state 0,1,2
+			cpuIdleTimePath[3][0] = "/sys/devices/system/cpu/cpu3/cpuidle/state0/time";
+			cpuIdleTimePath[3][1] = "/sys/devices/system/cpu/cpu3/cpuidle/state1/time";
+			cpuIdleTimePath[3][2] = "/sys/devices/system/cpu/cpu3/cpuidle/state2/time";
+			
+			//Idle Entry
+			//CPU0 idle entry state 0,1,2
+			cpuIdleEntryPath[0][0] = "/sys/devices/system/cpu/cpu0/cpuidle/state0/usage";
+			cpuIdleEntryPath[0][1] = "/sys/devices/system/cpu/cpu0/cpuidle/state1/usage";
+			cpuIdleEntryPath[0][2] = "/sys/devices/system/cpu/cpu0/cpuidle/state2/usage";
+			
+			//CPU1 idle entry state 0,1,2
+			cpuIdleEntryPath[1][0] = "/sys/devices/system/cpu/cpu1/cpuidle/state0/usage";
+			cpuIdleEntryPath[1][1] = "/sys/devices/system/cpu/cpu1/cpuidle/state1/usage";
+			cpuIdleEntryPath[1][2] = "/sys/devices/system/cpu/cpu1/cpuidle/state2/usage";
+			
+			//CPU2 idle entry state 0,1,2
+			cpuIdleEntryPath[2][0] = "/sys/devices/system/cpu/cpu2/cpuidle/state0/usage";
+			cpuIdleEntryPath[2][1] = "/sys/devices/system/cpu/cpu2/cpuidle/state1/usage";
+			cpuIdleEntryPath[2][2] = "/sys/devices/system/cpu/cpu2/cpuidle/state2/usage";
+			
+			//CPU3 idle entry state 0,1,2
+			cpuIdleEntryPath[3][0] = "/sys/devices/system/cpu/cpu3/cpuidle/state0/usage";
+			cpuIdleEntryPath[3][1] = "/sys/devices/system/cpu/cpu3/cpuidle/state1/usage";
+			cpuIdleEntryPath[3][2] = "/sys/devices/system/cpu/cpu3/cpuidle/state2/usage";
+			
+			
+				
+		}
 		
 		//initial values
-		for(int nc=0; nc<4; nc++)
+		for(int nc=0; nc<Config.numCore; nc++)
 		{	
-			for(int is=0; is<3; is++)
+			for(int is=0; is<Config.numIdleState; is++)
 			{
 				cpuIdleTimes[nc][is]  =	0; 
 				cpuIdleEntrys[nc][is] =	0;
@@ -163,8 +206,10 @@ public class FileMgr {
 		for(int j=0; j<cpuUtilNum.length; j++)
 		{
 			cpuUtil[j] = "";
-		}		
+		}	
 	}
+	
+	
 	
 	public static void updateResults()
 	{
@@ -176,9 +221,9 @@ public class FileMgr {
     	RandomAccessFile cpuIdleUsageFile = null;
     	RandomAccessFile brightFile = null;
     	RandomAccessFile governFile = null;
-    	RandomAccessFile voltFile = null;
-    	RandomAccessFile tempFile = null;
-    	
+    	//RandomAccessFile voltFile = null;
+    	//RandomAccessFile tempFile = null;
+    	RandomAccessFile bLFile = null;
     	try {
 			
 			cpuUtilFile = new RandomAccessFile(cpuUtilPath, "r");
@@ -200,22 +245,30 @@ public class FileMgr {
 				cpuUtil[j] = String.format("%.2f",cpuUtilNum[j]);
 			}
 			
-			for(int cos=0; cos<4; cos++)
+			if(Config.DUT==2)
 			{
-				cpuOnlineStatus[cos] = Integer.parseInt(new RandomAccessFile(cpuOnlineStatusPath[cos],"r").readLine());
+				for(int cos=0; cos<Config.numCore; cos++)
+				{
+					cpuOnlineStatus[cos] = Integer.parseInt(new RandomAccessFile(cpuOnlineStatusPath[cos],"r").readLine());
+				}
+				
+				bLFile = new RandomAccessFile(blStatusPath, "r");
+				bLFile.readLine();
+				bL_status[0] = bLFile.readLine();
+				bL_status[1] = bLFile.readLine();
+				
+			}
+			else if(Config.DUT == 1){
+				
+				cpuOnlineStatus[0] = 1;
 			}
 			
-			for(int nc=0; nc<4; nc++)
+			for(int nc=0; nc<Config.numCore; nc++)
 			{	
-				for(int is=0; is<3; is++)
+				for(int is=0; is<Config.numIdleState; is++)
 				{
 					if(cpuOnlineStatus[nc]==1)
 					{
-						//cpuIdleTimes[nc][is]  =	(Long.parseLong(new RandomAccessFile(cpuIdleTimePath[nc][is],"r").readLine())/1000) - (prevCpuIdleTimes[nc][is]);
-						//cpuIdleEntrys[nc][is] =	(Long.parseLong(new RandomAccessFile(cpuIdleEntryPath[nc][is],"r").readLine())/1000) - (prevCpuIdleEntrys[nc][is]);
-						
-						//prevCpuIdleTimes[nc][is] = cpuIdleTimes[nc][is];
-						//prevCpuIdleEntrys[nc][is] = cpuIdleEntrys[nc][is];
 						
 						cpuIdleTimes[nc][is] = CPU.parseCPUIdleTime(Double.parseDouble(new RandomAccessFile(cpuIdleTimePath[nc][is],"r").readLine()),nc,is)/1000; //return millisecond per sec
 						cpuIdleEntrys[nc][is] = CPU.parseCPUIdleUsage(Double.parseDouble(new RandomAccessFile(cpuIdleEntryPath[nc][is],"r").readLine()),nc,is);
@@ -232,28 +285,34 @@ public class FileMgr {
 			memUse = CPU.parseMemUse(mPath);
 			cacheUse = CPU.parseCacheUse(mPath);
 								
-			for(int cfd = 0; cfd < 4; cfd++){
+			for(int cfd = 0; cfd < Config.numCore; cfd++){
 			
-				cpuFreqFile = new RandomAccessFile(cpuFrePath[cfd], "r");
-				cpuFreqData[cfd] = Double.parseDouble(cpuFreqFile.readLine())/1000;
-			
+				if(cpuOnlineStatus[cfd]==1)
+				{
+					cpuFreqFile = new RandomAccessFile(cpuFrePath[cfd], "r");
+					cpuFreqData[cfd] = Double.parseDouble(cpuFreqFile.readLine())/1000;
+				}
+				else{				
+					cpuFreqData[cfd] = -1;
+				}
 			}
 			
 			brightFile = new RandomAccessFile(bPath, "r");
 			brightData = Double.parseDouble(brightFile.readLine());
 			
-			//governFile = new RandomAccessFile(gPath, "r");
-			//governData = governFile.readLine();
+			governFile = new RandomAccessFile(gPath, "r");
+			governData = governFile.readLine();
 			
-			voltFile = new RandomAccessFile(vPath, "r");
-			voltData = Double.parseDouble(voltFile.readLine())/1000000;
+			//voltFile = new RandomAccessFile(vPath, "r");
+			//voltData = Double.parseDouble(voltFile.readLine())/1000000;
 			
-			tempFile = new RandomAccessFile(tPath, "r");
-			tempData = Double.parseDouble(tempFile.readLine())/10;
+			//tempFile = new RandomAccessFile(tPath, "r");
+			//tempData = Double.parseDouble(tempFile.readLine())/10;
 			
-			txPacket = WiFi.TxPacket(txPath);
+			//txPacket = WiFi.TxPacket(txPath);
 			
-			rxPacket = WiFi.RxPacket(rxPath);
+			//rxPacket = WiFi.RxPacket(rxPath);
+			
 			
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
@@ -285,6 +344,9 @@ public class FileMgr {
                 
                 if(cpuIdleUsageFile != null)
                 	cpuIdleUsageFile.close();
+                
+                if(bLFile != null)
+                	bLFile.close();
                  
             } catch (IOException ex) {
                 ex.printStackTrace();
@@ -299,7 +361,7 @@ public class FileMgr {
 		
 		try 
 		{
-		
+			
 			RandomAccessFile file = new RandomAccessFile(path, "r");		
 			result = file.readLine();
 			file.close();

@@ -3,6 +3,8 @@ package com.example.trains4;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.SystemClock;
+import android.util.Log;
+import android.view.Display;
 
 class HwTrainForExternal extends AsyncTask<Integer, String, Integer>
 {
@@ -29,11 +31,19 @@ class HwTrainForExternal extends AsyncTask<Integer, String, Integer>
 		int offset = 100;
 		
 		public String setUtil = "-1";
+		Ui view;
 		
-		public HwTrainForExternal(String data, String hw)
+		Screen _screen;
+		int colorSize = 0;
+		GPS gps;
+		
+		public HwTrainForExternal(String data, String hw, Ui ui)
 		{
 			setUtil = data;
 			hwName = hw;
+			view = ui;
+			_screen = new Screen();
+			colorSize = _screen.colors.size();
 		}
 		
 		public void killProcess() throws InterruptedException
@@ -44,84 +54,114 @@ class HwTrainForExternal extends AsyncTask<Integer, String, Integer>
 		@Override
     	protected void onPreExecute()
     	{   
-			if(hwName == "wifi"){
-				
-				WiFi.createTestFile();
-				
+			if(hwName == "wifi")
+			{
+				WiFi.createTestFile();				
+			}
+			
+			if(hwName == "gps")
+			{		
+				gps = new GPS(view._act);
 			}
     	}
 
+		public void CPUTrain2()
+		{
+			
+			int loop = 1;
+			
+			Screen.SetBrightness(150);
+			hwName = "test_cpu";
+			//Vary cpu util
+			for(int i=0; i<=10; i++)
+			{
+				
+				
+				CPU.callStrc(50000, i*5000 );
+				
+				this.publishProgress("cpu_"+i);
+				
+				
+				
+				while(loop < 30){
+					
+					SystemClock.sleep(1000);
+					++loop;
+				}
+				
+				//CPU.killTrainApp();
+				
+				loop = 1;
+				
+			}
+			CPU.killTrainApp();
+			this.isBreak = true;
+			this.isMainBreak = true;
+		}
+		
 		public void CPUTrain()
 		{
-			Screen.SetBrightness(255);
 			
-			String governor = "powersave";
-	    	int freqs[] = {100000, 200000,400000,800000,1000000};
-	    	int utils[] = {0}; //,10,20,30,40,50,60,70,80,90,100};
+	    	int freqs[]  = { 800000, 1200000 }; //, 1200000, 1600000 }; //, 350000 , 450000, 500000, 550000, 600000, 800000, 900000, 1000000, 1100000, 1200000, 1300000, 1400000, 1500000, 1600000 };
+	    	int utils[]  = {1, 20, 50 };
+	        int idles[]  = {1, 20, 100, 1000};
+	        	        
+	       
 	    	
-	    	utils[0] = Integer.parseInt(setUtil);
-	    	
-	    	totalStep = utils.length * freqs.length;
-
-		    //////////////////////////Train CPU ////////////////////////////
-	    	
-	    	for(int u=0; u<utils.length; u++)
-	    	{
-	    		
-	    		CPU.setUtil(utils[u]);
-	    		
-	    		currentUtil = utils[u];
-	    		  		
-	    		for(int f=0; f<freqs.length; f++)
-	    		{
-	    			++currentStep;
-	    			currentFreq = freqs[f]/1000;	
-	    			isLoopEnd = false;
-	    			
-	    			hwName = "cpu_"+ currentUtil +"_"+ currentFreq;
-	    			CPU.setData(governor , ""+freqs[f]);
-	    			
-	    			
-	    			//Break 30 seconds
-		    		SystemClock.sleep(delay*1000);
-		    		Screen.SetBrightness(5);
+		    	for(int f=0; f<freqs.length; f++)
+		    	{
+		    		    		
+		    		Screen.SetBrightness(255);
 		    		
-		    		isStartTrain = true;
+		    		//Set frequency
+		    		CPU.setCPUFreq("", freqs[f],0);
 		    		
-		    		while(!isLoopEnd)
-	    	    	{
-	    	    			    	    		
-	    	    		if(position == offset) //Math.floor(0.99f * offset))
-	    	    		{
-	    	    			position = 0;
-	    	    			isLoopEnd = true;
-	    	    		}
-	    	    		
-	    	    		SystemClock.sleep(1000);
-	    	    		++position;
-	    	    	}
-	    	    	
-	    	    	Screen.SetBrightness(255);
-	    		}
-	    		
-	    		//save file
-	    		isBreak = true;
-	    		isMainBreak = true;
-	    		Screen.SetBrightness(255);
-	    	
-	    		CPU.killTrainApp();
-	    	}
-	    	
-	    	currentStep = 0;
-	    	
-	    	CPU.setData(governor , "1000000");	
-	    	isMainBreak = true;
-	    	
-	    	//End CPU training
+		    		SystemClock.sleep(5000);
+		    		
+		    		for(int u=0; u<utils.length; u++)
+		    		{
+			    	  	    	
+			    		for(int i=0; i<idles.length; i++)
+			    		{
+			    			
+			    			int y = (utils[u] * (idles[i] * 1000)) / (101 - utils[u]);
+			                int x = (idles[i] * 1000) + y;
+			    	      	CPU.callStrc(x, y);
+			    	    	
+			    	      	SystemClock.sleep(5000);
+			    	      	
+				    	    for(int test=1; test<=7; test++)
+				    		{
+				    			
+				    			    hwName = "test_"+ test +"_freq_"+ freqs[f]/1000 +"_util_"+ utils[u] +"_idle_"+ idles[i];
+				    			
+					    			this.publishProgress(hwName);
+					    								    			
+						    		Screen.SetBrightness(20);
+					    						    		 
+						    		//Training time
+						    		SystemClock.sleep(60000);
+						    		
+						    		CPU.killTrainApp();
+						    		
+						    		Screen.SetBrightness(255);
+						    	
+						    		this.isBreak = true;
+						    		
+						    		SystemClock.sleep(10000);
+					    		
+				    		}
+		    		}
+		    	}
+	        }
+	        
+	        this.isMainBreak = true;
+	    		    	
 		}
 		
 		int brightData = 0;
 		int trainDuration = 100; //seconds
+		int indx = 0;
 		public void ScreenTrain()
 		{
 		
@@ -131,7 +171,7 @@ class HwTrainForExternal extends AsyncTask<Integer, String, Integer>
 			     //for(int c=0; c<colors.length; c++)
 				 //{
 				 
-				 int[] brightness = {0,25,50,75,100,125,150,175,200,225,255};
+				 /*int[] brightness = {0,25,50,75,100,125,150,175,200,225,255};
 				 
 				 this.totalStep = brightness.length;
 				 SystemClock.sleep(30000);
@@ -155,14 +195,66 @@ class HwTrainForExternal extends AsyncTask<Integer, String, Integer>
 		    		
 				 Screen.SetBrightness(255);
 		    	 isBreak = true;
-		    	 isMainBreak = true;
-			 
+		    	 isMainBreak = true;*/
+			
+				 int brightArr[] = { 255 }; //0, 43, 85 ,128,170,213, 255};
+				 for(int b=0; b<brightArr.length; b++)
+				 { 
+					 Screen.SetBrightness(brightArr[b]);
+					 
+					 hwName = "screen_color_b_"+ brightArr[b];
+		    		 
+					 while(indx < this.colorSize)
+		    		 {	
+		    			 this.publishProgress("invoke");
+		    			 SystemClock.sleep(30000);
+		    		 }
+		    		 
+					 this.isBreak = true;
+		    		 
+					 SystemClock.sleep(5000);
+		    		 
+					 indx = 0;
+				 }
+				 
+				 this.isMainBreak = true;
+    		 
 		}
 		
 		public void GPSTrain()
 		{
-				//new GPS().startGPS();	
-				hwName = "gps";
+				
+				int testTime = 0;
+				
+				for(int test=1; test<=7; test++)
+				{
+					
+					hwName = "gps_"+test;				
+					Screen.SetBrightness(20);
+					
+					while(testTime < 150)
+					{
+						if(testTime == 20){
+							this.publishProgress("start_gps");
+							
+						}
+						else if(testTime == 100){
+							this.publishProgress("stop_gps");
+							
+						}
+						
+						SystemClock.sleep(Config.sampleRate);	
+						++testTime;
+					}
+					
+					testTime=0;
+					Screen.SetBrightness(255);
+					this.isBreak = true;
+					SystemClock.sleep(10000);
+				}
+				
+				
+				this.isMainBreak = true;
 		}
 		
 		public void BluetoothTrain(){
@@ -188,7 +280,7 @@ class HwTrainForExternal extends AsyncTask<Integer, String, Integer>
 				while(currentStep < totalStep )
 	    		{		
 	    			 SystemClock.sleep(1000);
-	    			 ++currentStep;
+	    			 ++currentStep; 
 	    		}
 	    		 
 				//isStartTrain=false;
@@ -233,14 +325,9 @@ class HwTrainForExternal extends AsyncTask<Integer, String, Integer>
 				
 				Util.delay(5000);
 				
-				
 				Screen.SetBrightness(255);
 				
-				
-				
 			}
-			
-			
 			
 			isMainBreak = true;
 		}
@@ -255,6 +342,7 @@ class HwTrainForExternal extends AsyncTask<Integer, String, Integer>
 			else if(hwName.equals("screen"))
 			{
 				this.ScreenTrain();
+				
 			}
 			else if(hwName.equals("gps"))
 			{
@@ -269,16 +357,60 @@ class HwTrainForExternal extends AsyncTask<Integer, String, Integer>
 			else {
 				
 			}
-			
-			//SystemClock.sleep(1000);
 			 
 	    	return 1;
 		}
 		
+		
 		@Override
     	protected void onProgressUpdate(String... arg1)
     	{
-			Screen.li.setBackgroundColor(Color.parseColor(arg1[0]));
+			
+			if(hwName.equals("screen"))
+			{
+				String colorSet = _screen.colors.get(indx);
+				
+				Screen.color = colorSet;
+				
+				Log.i("color", colorSet);
+				
+				String colorEle[] = colorSet.split(" ");
+			
+				int r = Integer.parseInt(colorEle[0]);
+				int g = Integer.parseInt(colorEle[1]);
+				int b = Integer.parseInt(colorEle[2]);
+				
+				Screen._view.setBackgroundColor(Color.rgb(r, g, b));
+				
+			    Screen._view.invalidate();
+			    
+			    ++indx;
+				
+			    Log.i("indx", ""+indx );
+				/*if(once == 1){
+					once = 0;
+					Display display = view._act.getWindowManager().getDefaultDisplay();
+					@SuppressWarnings("deprecation")
+					Screen screen = new Screen(view._act, display.getWidth(), display.getHeight());
+					view._act.setContentView(screen);
+				}*/
+			}
+			
+			if(arg1[0].equals("start_gps")){
+				
+				gps.startGPS();
+			}
+			else if(arg1[0].equals("stop_gps")){
+				gps.stopGPS();
+			}
+			
+			if(arg1[0].contains("cpu_"))
+			{
+				String[] datas = arg1[0].split("_");
+				view.cpuStatusTxt.setText("Train " + arg1[0] + " = 50000 / " + ( Integer.parseInt(datas[1]) * 5000 ));
+			}
+			
+			view.cpuStatusTxt.setText(arg1[0]);
     	}
 		
 		int resultFromCpuTask = 0;   

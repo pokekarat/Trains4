@@ -96,7 +96,8 @@ public class Ui {
 		spinner1 = (Spinner) act.findViewById(R.id.spinner1);
     }
     
-	public void showData(){
+	public void showData()
+	{
 		
 	 	statusTxt.setText("Status = SOD processing..");
     	
@@ -104,33 +105,63 @@ public class Ui {
     	
     	governTxt.setText("CPU governor =  "+ FileMgr.governData);
     	
-    	cpuUtilTxt.setText
-    	(
-    		 "CPU  U0=" + FileMgr.cpuUtil[0] + 
+    	
+    	if(Config.DUT == 1)
+    	{
+    		cpuUtilTxt.setText
+    		(    		
+    	    		 "CPU  U0=" + FileMgr.cpuUtil[0]
+    	    );
+    		
+    		cpuFreqTxt.setText
+	    	(
+	    		"Freq  F0="+ FileMgr.cpuFreqData[0] + "\n" +
+	    			
+	    			"  Ts0  " + FileMgr.cpuIdleTimes[0][0]  + "\n" +
+	    			
+					"  Es0  " + FileMgr.cpuIdleEntrys[0][0] + "\n" +
+				
+					"  Bright = " + FileMgr.brightData
+	    	);
+    	}
+    	else if(Config.DUT == 2)
+    	{
+    		cpuUtilTxt.setText
+    		(    		
+    			"CPU  U0=" + FileMgr.cpuUtil[0] + 
     			"  U1=" + ((FileMgr.cpuUtil[1].equals("-1.00"))?"x":FileMgr.cpuUtil[1]) + 
     			"  U2=" + ((FileMgr.cpuUtil[2].equals("-1.00"))?"x":FileMgr.cpuUtil[2]) +
-    			"  U3=" + ((FileMgr.cpuUtil[3].equals("-1.00"))?"x":FileMgr.cpuUtil[3])
-    	);
-    	
-    	cpuFreqTxt.setText
-    	(
-    		"Freq  F0="+ FileMgr.cpuFreqData[0] +
-    			"  F1=" + ((FileMgr.cpuUtil[1].equals("-1.00"))?"x":FileMgr.cpuFreqData[1]) +
-    			"  F2=" + ((FileMgr.cpuUtil[2].equals("-1.00"))?"x":FileMgr.cpuFreqData[2]) +
-    			"  F3=" + ((FileMgr.cpuUtil[3].equals("-1.00"))?"x":FileMgr.cpuFreqData[3]) + "\n\n" +
-    			
-    			"  Ts0  " + FileMgr.cpuIdleTimes[0][0] + "   " + FileMgr.cpuIdleTimes[1][0] + "   " + FileMgr.cpuIdleTimes[2][0] + "   " + FileMgr.cpuIdleTimes[3][0] + "\n" +
-    			"  Ts1  " + FileMgr.cpuIdleTimes[0][1] + "   " + FileMgr.cpuIdleTimes[1][1] + "   " + FileMgr.cpuIdleTimes[2][1] + "   " + FileMgr.cpuIdleTimes[3][1] + "\n" +
-    			"  Ts2  " + FileMgr.cpuIdleTimes[0][2] + "   " + FileMgr.cpuIdleTimes[1][2] + "   " + FileMgr.cpuIdleTimes[2][2] + "   " + FileMgr.cpuIdleTimes[3][2] + "\n\n" +
-    			
-				"  Es0  " + FileMgr.cpuIdleEntrys[0][0] + "   " + FileMgr.cpuIdleEntrys[1][0] + "   " + FileMgr.cpuIdleEntrys[2][0] + "   " + FileMgr.cpuIdleEntrys[3][0] + "\n" +
-				"  Es1  " + FileMgr.cpuIdleEntrys[0][1] + "   " + FileMgr.cpuIdleEntrys[1][1] + "   " + FileMgr.cpuIdleEntrys[2][1] + "   " + FileMgr.cpuIdleEntrys[3][1] + "\n" +
-				"  Es2  " + FileMgr.cpuIdleEntrys[0][2] + "   " + FileMgr.cpuIdleEntrys[1][2] + "   " + FileMgr.cpuIdleEntrys[2][2] + "   " + FileMgr.cpuIdleEntrys[3][2]
-    	);
+    			"  U3=" + ((FileMgr.cpuUtil[3].equals("-1.00"))?"x":FileMgr.cpuUtil[3]) +
+    			"\n" + FileMgr.bL_status[0] + "\n"
+    		);
+    		
+    		cpuFreqTxt.setText
+	    	(
+	    		"\nFreq  F0="+ FileMgr.cpuFreqData[0] +
+	    			"  F1=" + ((FileMgr.cpuUtil[1].equals("-1.00"))?"x":FileMgr.cpuFreqData[1]) +
+	    			"  F2=" + ((FileMgr.cpuUtil[2].equals("-1.00"))?"x":FileMgr.cpuFreqData[2]) +
+	    			"  F3=" + ((FileMgr.cpuUtil[3].equals("-1.00"))?"x":FileMgr.cpuFreqData[3]) + 
+	    			" \n" +FileMgr.bL_status[1] +
+	    			"\n\n" +
+	    			
+	    			"  Ts0  " + FileMgr.cpuIdleTimes[0][0] + "   " + FileMgr.cpuIdleTimes[1][0] + "   " + FileMgr.cpuIdleTimes[2][0] + "   " + FileMgr.cpuIdleTimes[3][0] + "\n" +
+	    			"  Ts1  " + FileMgr.cpuIdleTimes[0][1] + "   " + FileMgr.cpuIdleTimes[1][1] + "   " + FileMgr.cpuIdleTimes[2][1] + "   " + FileMgr.cpuIdleTimes[3][1] + "\n" +
+	    			"  Ts2  " + FileMgr.cpuIdleTimes[0][2] + "   " + FileMgr.cpuIdleTimes[1][2] + "   " + FileMgr.cpuIdleTimes[2][2] + "   " + FileMgr.cpuIdleTimes[3][2] + "\n\n" +
+	    			
+					"  Es0  " + FileMgr.cpuIdleEntrys[0][0] + "   " + FileMgr.cpuIdleEntrys[1][0] + "   " + FileMgr.cpuIdleEntrys[2][0] + "   " + FileMgr.cpuIdleEntrys[3][0] + "\n" +
+					"  Es1  " + FileMgr.cpuIdleEntrys[0][1] + "   " + FileMgr.cpuIdleEntrys[1][1] + "   " + FileMgr.cpuIdleEntrys[2][1] + "   " + FileMgr.cpuIdleEntrys[3][1] + "\n" +
+					"  Es2  " + FileMgr.cpuIdleEntrys[0][2] + "   " + FileMgr.cpuIdleEntrys[1][2] + "   " + FileMgr.cpuIdleEntrys[2][2] + "   " + FileMgr.cpuIdleEntrys[3][2] + "\n" +
+					"  Bright = " + FileMgr.brightData
+	    	);
+		}
     	
     	brightTxt.setText("Brightness level =  "+ FileMgr.brightData);
     	
-    	gpsTxt.setText("GPS Location =  0");
+    	gpsTxt.setText("GPS enable="+ GPS.gpsEnabled + 
+    			" \nstatus=" + GPS.gpsStatus + 
+				" \nfix=" + GPS.gpsFix +
+				" \nnumSat="  + GPS.numSat + 
+				" \nlocate=" + GPS.locateStr);
     	
     	battTxt.setText("Battery capacity =  "+ Battery.getBatteryLevel());
     	
@@ -186,7 +217,7 @@ public class Ui {
 			{
 				if(((CheckBox) v).isChecked())
 				{
-					gps = new GPS(_act);
+					//gps = new GPS(_act);
 					
 					Log.i("GPS.java","Turn on = ");
 					hwTarget = "gps";

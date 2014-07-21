@@ -12,7 +12,6 @@ import android.util.Log;
 @SuppressLint("DefaultLocale")
 public class CPU {
 	
-	
 	//public static int BATT_LEVEL;
 	public static String cpu_prev = "";
 	public static String cpu_cur = "";
@@ -34,7 +33,7 @@ public class CPU {
 			
 			try {
 				
-				dos.writeBytes("killall strc "+"\n");
+				dos.writeBytes("/data/local/tmp/busybox killall strc "+"\n");
 				dos.writeBytes("exit\n");
 				dos.flush();
 				dos.close();
@@ -57,7 +56,7 @@ public class CPU {
 		//strcProcess.destroy();
 	}
 	
-	public static void setUtil(int percent){
+	public static void callStrc(int begin, int end){
 			
 		 try{
 				strcProcess = Runtime.getRuntime().exec("su");
@@ -65,12 +64,12 @@ public class CPU {
 				
 				try {
 					
-					dos.writeBytes("./data/local/tmp/strc " + percent + "\n");
+					dos.writeBytes("./data/local/tmp/strc " + begin + " " + end + "\n");
 					dos.writeBytes("exit\n");
 					dos.flush();
 					dos.close();
 					//strcProcess.waitFor();
-					Log.i("CPU.java [StartTrainApp]","Called strc "+percent);
+					Log.i("CPU.java [StartTrainApp]","Called strc "+ (end/begin));
 			 
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
@@ -84,7 +83,7 @@ public class CPU {
 	 		}
 	}
 	
-	public static boolean setData(String gov, String freq){
+	public static boolean setCPUFreq(String gov, int freq, int core){
 
 		try 
  		{
@@ -95,8 +94,10 @@ public class CPU {
  			try {
  				
  				//dos.writeBytes("echo '"+gov+"' > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor" + "\n");
- 				dos.writeBytes("echo "+freq+" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq"  + "\n");
- 				dos.writeBytes("echo "+freq+" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq"  + "\n");
+ 				
+ 				dos.writeBytes("echo "+freq+" > /sys/devices/system/cpu/cpu"+core+"/cpufreq/scaling_min_freq"  + "\n");
+ 				dos.writeBytes("echo "+freq+" > /sys/devices/system/cpu/cpu"+core+"/cpufreq/scaling_max_freq"  + "\n");
+ 				
  				dos.writeBytes("exit\n");
  				dos.flush();
  				dos.close();
@@ -256,8 +257,8 @@ public class CPU {
 		return diff;
 	}
 	
-	static double[][] cpu_prev_idle_time = new double[4][3];
-	static double[][] cpu_cur_idle_time = new double[4][3];
+	static double[][] cpu_prev_idle_time = new double[Config.numCore][Config.numIdleState];
+	static double[][] cpu_cur_idle_time = new double[Config.numCore][Config.numIdleState];
 	
 	public static double parseCPUIdleTime(double proc, int row, int col)
 	{
@@ -269,43 +270,51 @@ public class CPU {
 		return diff;
 	}
 	
-	static double[][] cpu_prev_idle_usage = new double[4][3];
-	static double[][] cpu_cur_idle_usage = new double[4][3];
+	static double[][] cpu_prev_idle_usage = new double[Config.numCore][Config.numIdleState];
+	static double[][] cpu_cur_idle_usage = new double[Config.numCore][Config.numIdleState];
 	
 	public static double parseCPUIdleUsage(double proc, int row, int col)
 	{
 		
 		cpu_cur_idle_usage[row][col] = proc;
+		
+		Log.i("current idleUsage",cpu_cur_idle_usage[row][col]+"");
+		Log.i("prev idleUsage",cpu_prev_idle_usage[row][col]+"");
 		double diff = cpu_cur_idle_usage[row][col] - cpu_prev_idle_usage[row][col];
+		Log.i("diff idleUsage",diff+"");
 		cpu_prev_idle_usage[row][col] = cpu_cur_idle_usage[row][col];
 		
 		return diff;
 	}
 	
-	static double[] cpu_prev_total_util = new double[4];
-	static double[] cpu_prev_idle = new double[4];
-	static double[] cpu_cur_total_util =  new double[4];
-	static double[] cpu_cur_idle =  new double[4];
+	static double[] cpu_prev_total_util = new double[Config.numCore];
+	static double[] cpu_prev_idle = new double[Config.numCore];
+	static double[] cpu_cur_total_util =  new double[Config.numCore];
+	static double[] cpu_cur_idle =  new double[Config.numCore];
 	
 	public static double[] parseCPU(String proc)
 	{
 		
-		double[] rets = new double[4];
+		double[] rets = new double[Config.numCore];
 		
 		if(!proc.contains("cpu"))
 		{
-			double[] errors = new double[4];
+			double[] errors = new double[Config.numCore];
 			
-			errors[0]=errors[1]=errors[2]=errors[3]=-1;
+			for(int e=0; e<Config.numCore; ++e){
+				errors[e] = -1;
+			}
 			
 			return errors; 
 		}
 		
 		String[] cpus = proc.split(",");
 
-		int[] onlineChks = new int[4];
+		int[] onlineChks = new int[Config.numCore];
 		
-		onlineChks[0]=onlineChks[1]=onlineChks[2]=onlineChks[3]=-999;
+		for(int o=0; o<Config.numCore; ++o){
+			onlineChks[o] = -999;
+		}
 		
 		for(int c=0; c<cpus.length; c++)
 		{
@@ -336,7 +345,7 @@ public class CPU {
 	      
 		}
 		
-		if(cpus.length != 4){
+		if(cpus.length != Config.numCore){
 			for(int x=0; x<onlineChks.length; x++){
 				if(onlineChks[x] == -999){			
 					rets[x] = -1;

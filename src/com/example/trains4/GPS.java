@@ -13,17 +13,17 @@ import android.util.Log;
 public class GPS implements GpsStatus.Listener, LocationListener {
 
 	public static LocationManager locationManager;
-	public String locateStr = "GPS";
-	public String numSat = "0";
-	public String gpsStatus = "No status";
-	public boolean isStartOnce = true;	
-	public boolean gpsEnabled;
-	public boolean gpsFix;
+	public static String locateStr = "GPS";
+	public static String numSat = "0";
+	public static String gpsStatus = "No status";
+	public static boolean isStartOnce = true;	
+	public static boolean gpsEnabled;
+	public static boolean gpsFix;
 	private static final long DURATION_TO_FIX_LOST_MS = 10000;
-	private double latitude;
-	private double longitude;
-	private int satellitesTotal;
-	private int satellitesUsed;
+	private static double latitude;
+	private static double longitude;
+	private static int satellitesTotal;
+	private static int satellitesUsed;
 	private float accuracy;
 	// the last location time is needed to determine if a fix has been lost
 	private long locationTime = 0;
@@ -44,11 +44,11 @@ public class GPS implements GpsStatus.Listener, LocationListener {
 		enabled = this.isGPSon();
 		
 		if (!enabled) {
+			
 			  Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
 			  
 			  mAct.startActivity(intent);  	
-			  
-			  
+	  
 		} 
 		
 		Log.i("GPS.java","Turn on = "+enabled);
@@ -60,9 +60,11 @@ public class GPS implements GpsStatus.Listener, LocationListener {
 	}
 	
 	public void stopGPS(){
-		Intent intent = new Intent("android.location.GPS_ENABLED_CHANGE");
+		/*Intent intent = new Intent("android.location.GPS_ENABLED_CHANGE");
 		intent.putExtra("enabled", false);
-		mAct.sendBroadcast(intent);
+		mAct.sendBroadcast(intent);*/
+		
+		locationManager.removeUpdates(this);
 		
 	}
 
@@ -79,29 +81,29 @@ public class GPS implements GpsStatus.Listener, LocationListener {
 			
 			switch(changeType) {
 				case GpsStatus.GPS_EVENT_FIRST_FIX:
-					gpsEnabled = true;
-					gpsFix = true;
-					gpsStatus = "First Fix";
+				GPS.gpsEnabled = true;
+				GPS.gpsFix = true;
+				GPS.gpsStatus = "First Fix";
 					break;
 				case GpsStatus.GPS_EVENT_SATELLITE_STATUS:
-					gpsEnabled = true;
+					GPS.gpsEnabled = true;
 					// if it has been more then 10 seconds since the last update, consider the fix lost
-					gpsFix = System.currentTimeMillis() - locationTime < DURATION_TO_FIX_LOST_MS;
-					gpsStatus = "Satellite is fixed";
+					GPS.gpsFix = System.currentTimeMillis() - locationTime < DURATION_TO_FIX_LOST_MS;
+					GPS.gpsStatus = "Satellite is fixed";
 					break;
 				case GpsStatus.GPS_EVENT_STARTED: // GPS turned on
-					gpsEnabled = true;
-					gpsFix = false;
-					gpsStatus = "GPS start";
+					GPS.gpsEnabled = true;
+					GPS.gpsFix = false;
+					GPS.gpsStatus = "GPS start";
 					break;
 				case GpsStatus.GPS_EVENT_STOPPED: // GPS turned off
-					gpsEnabled = false;
-					gpsFix = false;
-					gpsStatus = "GPS stop";
+					GPS.gpsEnabled = false;
+					GPS.gpsFix = false;
+					GPS.gpsStatus = "GPS stop";
 					break;
 				default:
 					//Log.w(TAG, "unknown GpsStatus event type. "+changeType);
-					gpsStatus = "Unknown status";
+					GPS.gpsStatus = "Unknown status";
 					return;
 			}
 
@@ -116,10 +118,10 @@ public class GPS implements GpsStatus.Listener, LocationListener {
 				}
 			}
 			
-			satellitesTotal = newSatTotal;
-			satellitesUsed = newSatUsed;
+			GPS.satellitesTotal = newSatTotal;
+			GPS.satellitesUsed = newSatUsed;
 			
-			numSat = satellitesUsed + "/" + satellitesTotal;
+			GPS.numSat = satellitesUsed + "/" + satellitesTotal;
 		}
 	}
 
@@ -136,7 +138,8 @@ public class GPS implements GpsStatus.Listener, LocationListener {
 			updateRollingAverage(location.getAccuracy());
 		}
 
-		locateStr = locationTime + ":" + latitude + ":" + longitude;
+		GPS.locateStr = locationTime + ":" + latitude + ":" + longitude;
+		
 		//updateView();
 		
 	}
