@@ -3,7 +3,7 @@ package com.example.trains4;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-import com.example.trains4.R;
+
 
 import android.support.v7.app.ActionBarActivity;
 import android.widget.AdapterView.OnItemSelectedListener;
