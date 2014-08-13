@@ -1,5 +1,7 @@
 package com.example.trains4;
 
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -22,13 +24,12 @@ class ExternalMeasureTask extends AsyncTask<Integer, Integer , Integer>
 	public boolean isTrainStop;
 	HwTrainForExternal ht;
 	Ui view;
-	
-	
+		
 	public ExternalMeasureTask(String s, Ui v)
 	{
 		setExternal = s;
 		view = v;
-		v.hwTarget = "cpu"; //"gps"; "screen";
+		v.hwTarget = "wifi";// "screen";
 		hwTargetName = v.hwTarget;
 	}
 	
@@ -62,7 +63,7 @@ class ExternalMeasureTask extends AsyncTask<Integer, Integer , Integer>
 	@Override
 	protected Integer doInBackground(Integer... arg0)
 	{	
-    	   	
+		
     	while(true)
     	{
     		//At least one com is checked
@@ -70,7 +71,6 @@ class ExternalMeasureTask extends AsyncTask<Integer, Integer , Integer>
     		{    		
 	    		if(Config.currentSample == Config.startTrainTime)
 	    		{
-	    			 
 	    			 ht.execute(Config.currentSample);
 	    		}
     		}
@@ -96,11 +96,52 @@ class ExternalMeasureTask extends AsyncTask<Integer, Integer , Integer>
     String result = "";
     int startPoint = 0;
     int startCount = 0;    
+    boolean isOnce = true;
+    
+    protected void callSampleApp()
+    {
+    
+    	try 
+ 		{
+			Process process = Runtime.getRuntime().exec("su");
+ 			DataOutputStream dos = new DataOutputStream(process.getOutputStream());
+ 			
+ 			try {
+ 				
+ 				dos.writeBytes("./data/local/tmp/OGLES2PVRScopeExampleS4 3 70" + "\n"); 				 				
+ 				dos.writeBytes("exit\n");
+ 				dos.flush();
+ 				dos.close();
+ 				process.waitFor();
+			 
+ 			} catch (IOException e) {
+ 				
+ 				e.printStackTrace();
+ 			}
+ 			catch (InterruptedException e) {
+				
+				e.printStackTrace();
+			}
+ 		} 
+ 		catch (IOException e) {
+ 			
+ 			e.printStackTrace();
+ 		}
+    
+    }
     
 	@Override
 	protected void onProgressUpdate(Integer... arg1)
-	{    
+	{  
 		
+		if(isOnce){
+			
+			isOnce = false;
+			this.callSampleApp();
+			
+		}
+		
+		/*
 		FileMgr.updateResults();
 		view.showData();
 		
@@ -128,12 +169,12 @@ class ExternalMeasureTask extends AsyncTask<Integer, Integer , Integer>
 						
 						" bright=" +	FileMgr.brightData +
 						
-						/*" v=" + FileMgr.voltData + 
+						" v=" + FileMgr.voltData + 
 						" temper=" + FileMgr.tempData + 
 						" capacity=" + Battery.getBatteryLevel() +
 						" l=" + WiFi.wifiMgr.getConnectionInfo().getLinkSpeed() + 
 						" tx=" + (FileMgr.txPacket) + 
-						" rx=" + (FileMgr.rxPacket) + */
+						" rx=" + (FileMgr.rxPacket) + 
 						" mem=" + FileMgr.memUse +
 						" cache=" + FileMgr.cacheUse;
 			}
@@ -150,12 +191,6 @@ class ExternalMeasureTask extends AsyncTask<Integer, Integer , Integer>
 							" idle_entry_s2=" + (FileMgr.cpuIdleEntrys[0][2]) +
 							" freq=" + FileMgr.cpuFreqData[0] +
 							" bright=" +	FileMgr.brightData +
-							/*" v=" + FileMgr.voltData + 
-							" temper=" + FileMgr.tempData + 
-							" capacity=" + Battery.getBatteryLevel() +
-							" l=" + WiFi.wifiMgr.getConnectionInfo().getLinkSpeed() + 
-							" tx=" + (FileMgr.txPacket) + 
-							" rx=" + (FileMgr.rxPacket) + */
 							" mem=" + FileMgr.memUse +
 							" cache=" + FileMgr.cacheUse + 
 							" " + FileMgr.bL_status[0] + 
@@ -273,10 +308,9 @@ class ExternalMeasureTask extends AsyncTask<Integer, Integer , Integer>
 			
 			Log.i("Sample", Config.currentSample+"");
 		}
-    		
+    		*/
 	}
-	
-	
+		
 	@Override
 	protected void onPostExecute(Integer result){
 	    //result comes from return value of doInBackground

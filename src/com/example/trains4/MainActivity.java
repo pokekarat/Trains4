@@ -122,8 +122,8 @@ public class MainActivity extends ActionBarActivity
  				
  				if(Config.DUT == 2)
  				{
- 					dos.writeBytes("echo 250000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq" + "\n");
- 					dos.writeBytes("echo 1400000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq" + "\n");
+ 					dos.writeBytes("echo 400000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq" + "\n");
+ 					dos.writeBytes("echo 400000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq" + "\n");
  					dos.writeBytes("chmod 777 /sys/class/backlight/panel/brightness"+"\n");
  					dos.writeBytes("echo 255 > /sys/class/backlight/panel/brightness"+"\n");
  					dos.writeBytes("chmod 777 /dev/bL_status" + "\n");
@@ -136,8 +136,6 @@ public class MainActivity extends ActionBarActivity
  					dos.writeBytes("chmod 777 /sys/class/backlight/s5p_bl/brightness"+"\n");
  					dos.writeBytes("echo 255 >  /sys/class/backlight/s5p_bl/brightness"+"\n");
  				}
- 				
- 				
  				
  				dos.writeBytes("exit\n");
  				dos.flush();
@@ -172,16 +170,13 @@ public class MainActivity extends ActionBarActivity
 				case 0:
 				
 				this.initSet();
-				
 				ExternalMeasureTask externalTask = new ExternalMeasureTask(this.extraValue, ui);
 				externalTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, minBatt);
 				
 			
 				break;
 				
-				case 1:
-
-				
+				case 1:			
 				SODTask sodTask = new SODTask(ui);
 				sodTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, minBatt);
 				
@@ -194,6 +189,11 @@ public class MainActivity extends ActionBarActivity
 		{			
 			//controlTask.cancel(true);
 		}
+	}
+	
+	private String getWiFiLinkSpeed(String text)
+	{
+		return String.valueOf(WiFi.getLinkSpeed());
 	}
 }
 

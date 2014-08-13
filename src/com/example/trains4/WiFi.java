@@ -20,10 +20,18 @@ public class WiFi {
 	public static WifiManager wifiMgr;
 	static String[] outMsg2 = new String[15];
 	static String outMsg = "";
+	static BufferedWriter out;
+	static Socket s;
+	
+	public static int getLinkSpeed(){
+		
+		return wifiMgr.getConnectionInfo().getLinkSpeed();
+		
+	}
 	
 	public static void createTestFile(){
 		
-		for(int i=1; i<= 10000; i++){
+		for(int i=1; i<= 30000; i++){
 			outMsg += "A";
 		}
 	}
@@ -55,14 +63,11 @@ public class WiFi {
 		wifiInfo = wifiMgr.getConnectionInfo();
 	}
 	
-	static BufferedWriter out;
-	static Socket s;
-	
 	public static void initToServer(){
 		
 		try {
 			
-			s = new Socket("192.168.1.10",5555);
+			s = new Socket("192.168.152.1",5555);
 				
 			out = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));
 				
@@ -73,15 +78,10 @@ public class WiFi {
 		} catch (IOException e) {
 				
 			e.printStackTrace();
-		}	
-	}
-	
-		
-	public static void recFileFromServer(){
-		
+		}
 		
 	}
-	
+		
 	public static void sendFileToServer()
 	{
 		try {
@@ -111,9 +111,9 @@ public class WiFi {
 		
 		try {
 			
-			//out.write("x\n");
+			out.write("x\n");
 			
-			//out.flush();
+			out.flush();
 	    	
 	    	out.close();
 	    	
@@ -126,6 +126,7 @@ public class WiFi {
 	}
 	
 	private static int prevTx = -1;
+	
 	private static int prevRx = -1;
 	
 	public static int TxPacket(String path)
@@ -157,4 +158,5 @@ public class WiFi {
 			return numRx;
 		}
 	}
+
 }

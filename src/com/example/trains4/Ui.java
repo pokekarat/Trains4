@@ -175,7 +175,7 @@ public class Ui {
     	int strength = WiFi.wifiMgr.getConnectionInfo().getRssi(); //WifiManager.calculateSignalLevel(WiFi.wifiMgr.getConnectionInfo().getRssi(),5);
 	
     	wifiStateTxt.setText(String.format("%s \nat %s%s. \nStrength %s \ntx= %s rx=%s", ssid,speed,units,strength, FileMgr.txPacket, FileMgr.rxPacket));
-	    	
+	    wifiTxt.setText("Link speed = "+speed);
 	}
 	
 	public void setCB(){

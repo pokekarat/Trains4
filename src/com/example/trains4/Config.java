@@ -5,8 +5,8 @@ public class Config {
 	public static int currentSample = 0;
 	public static boolean processing;
 	public static int sampleRate = 1000; //millisecond
-	public static int startTrainTime = 30;// * (1000/sampleRate);
-	public static int stopTrainTime = 150;// * (1000/sampleRate);
+	public static int startTrainTime = 10;// * (1000/sampleRate);
+	public static int stopTrainTime = 60;// * (1000/sampleRate);
 	public static String result = "";
 	public static boolean isSave = false;
 	

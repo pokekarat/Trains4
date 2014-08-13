@@ -83,6 +83,33 @@ public class CPU {
 	 		}
 	}
 	
+	public static void callProcess(String procName){
+		
+		 try{
+				strcProcess = Runtime.getRuntime().exec("su");
+				DataOutputStream dos = new DataOutputStream(strcProcess.getOutputStream());
+				
+				try {
+					
+					dos.writeBytes(procName + "\n");
+					dos.writeBytes("exit\n");
+					dos.flush();
+					dos.close();
+					
+					Log.i("CPU.java [StartTrainApp]","Called "+ procName);
+			 
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+		    }
+			catch (IOException e) {
+	 			// TODO Auto-generated catch block
+	 			e.printStackTrace();
+	 		}
+	}
+	
 	public static boolean setCPUFreq(String gov, int freq, int core){
 
 		try 

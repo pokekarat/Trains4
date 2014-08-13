@@ -94,9 +94,11 @@ class HwTrainForExternal extends AsyncTask<Integer, String, Integer>
 				loop = 1;
 				
 			}
+			
 			CPU.killTrainApp();
 			this.isBreak = true;
 			this.isMainBreak = true;
+			
 		}
 		
 		public void CPUTrain()
@@ -105,57 +107,55 @@ class HwTrainForExternal extends AsyncTask<Integer, String, Integer>
 	    	int freqs[]  = { 800000, 1200000 }; //, 1200000, 1600000 }; //, 350000 , 450000, 500000, 550000, 600000, 800000, 900000, 1000000, 1100000, 1200000, 1300000, 1400000, 1500000, 1600000 };
 	    	int utils[]  = {1, 20, 50 };
 	        int idles[]  = {1, 20, 100, 1000};
-	        	        
-	       
-	    	
-		    	for(int f=0; f<freqs.length; f++)
-		    	{
-		    		    		
-		    		Screen.SetBrightness(255);
-		    		
-		    		//Set frequency
-		    		CPU.setCPUFreq("", freqs[f],0);
-		    		
-		    		SystemClock.sleep(5000);
-		    		
-		    		for(int u=0; u<utils.length; u++)
+	        	        	    	
+	    	for(int f=0; f<freqs.length; f++)
+	    	{
+	    		    		
+	    		Screen.SetBrightness(255);
+	    		
+	    		//Set frequency
+	    		CPU.setCPUFreq("", freqs[f],0);
+	    		
+	    		SystemClock.sleep(5000);
+	    		
+	    		for(int u=0; u<utils.length; u++)
+	    		{
+		    	  	    	
+		    		for(int i=0; i<idles.length; i++)
 		    		{
-			    	  	    	
-			    		for(int i=0; i<idles.length; i++)
+		    			
+		    			int y = (utils[u] * (idles[i] * 1000)) / (101 - utils[u]);
+		                int x = (idles[i] * 1000) + y;
+		    	      	CPU.callStrc(x, y);
+		    	    	
+		    	      	SystemClock.sleep(5000);
+		    	      	
+			    	    for(int test=1; test<=7; test++)
 			    		{
 			    			
-			    			int y = (utils[u] * (idles[i] * 1000)) / (101 - utils[u]);
-			                int x = (idles[i] * 1000) + y;
-			    	      	CPU.callStrc(x, y);
-			    	    	
-			    	      	SystemClock.sleep(5000);
-			    	      	
-				    	    for(int test=1; test<=7; test++)
-				    		{
-				    			
-				    			    hwName = "test_"+ test +"_freq_"+ freqs[f]/1000 +"_util_"+ utils[u] +"_idle_"+ idles[i];
-				    			
-					    			this.publishProgress(hwName);
-					    								    			
-						    		Screen.SetBrightness(20);
-					    						    		 
-						    		//Training time
-						    		SystemClock.sleep(60000);
-						    		
-						    		CPU.killTrainApp();
-						    		
-						    		Screen.SetBrightness(255);
-						    	
-						    		this.isBreak = true;
-						    		
-						    		SystemClock.sleep(10000);
+			    			    hwName = "test_"+ test +"_freq_"+ freqs[f]/1000 +"_util_"+ utils[u] +"_idle_"+ idles[i];
+			    			
+				    			this.publishProgress(hwName);
+				    								    			
+					    		Screen.SetBrightness(20);
+				    						    		 
+					    		//Training time
+					    		SystemClock.sleep(60000);
 					    		
-				    		}
+					    		CPU.killTrainApp();
+					    		
+					    		Screen.SetBrightness(255);
+					    	
+					    		this.isBreak = true;
+					    		
+					    		SystemClock.sleep(10000);
+				    		
+			    		}
 		    		}
-		    	}
-	        }
+	    		}
+	    	}
 	        
-	        this.isMainBreak = true;
+		    this.isMainBreak = true;
 	    		    	
 		}
 		
@@ -226,19 +226,21 @@ class HwTrainForExternal extends AsyncTask<Integer, String, Integer>
 				
 				int testTime = 0;
 				
-				for(int test=1; test<=7; test++)
+				for(int test=4; test<=5; test++)
 				{
 					
 					hwName = "gps_"+test;				
-					Screen.SetBrightness(20);
+					Screen.SetBrightness(10);
+					CPU.callProcess("./data/local/tmp/OGLES2PVRScopeExampleS4 " + test + " " + (Config.stopTrainTime+20));
 					
-					while(testTime < 150)
+		
+					while(testTime < Config.stopTrainTime+20)
 					{
 						if(testTime == 20){
 							this.publishProgress("start_gps");
-							
 						}
-						else if(testTime == 100){
+						
+						else if(testTime == Config.stopTrainTime){
 							this.publishProgress("stop_gps");
 							
 						}
@@ -302,33 +304,44 @@ class HwTrainForExternal extends AsyncTask<Integer, String, Integer>
 		
 		public void wifiTrain(){
 		
-			int numOfTest = 1;
+			int numOfTest = 20;
+			int delay = 2000;
+			int scale = 100;
 			
 			WiFi.initToServer();
 			
-			for(int i=1; i<=numOfTest; i++){
-							
-				Screen.SetBrightness(0);
-					
+			Util.delay(delay);
+			
+			Screen.SetBrightness(0);
+			
+			Util.delay(10000);
+			
+			for(int i=1; i<=numOfTest; i++)
+			{
+								
 				isStartTrain = true;
-				
-				Util.delay(5000);
-				
 				
 				hwName = "wifi"+i;
 				
-				Screen.SetBrightness(255);
 				WiFi.sendFileToServer();
-				WiFi.closeToServer();
-				Screen.SetBrightness(0);
-				isBreak = true;
 				
-				Util.delay(5000);
+				Util.delay(delay);
 				
-				Screen.SetBrightness(255);
+				delay -= scale;
+				
+				if(delay < 500)
+					scale = 50;
+				else
+					scale = 100;
 				
 			}
 			
+			WiFi.closeToServer();
+			
+			Util.delay(10000);
+			
+			Screen.SetBrightness(255);
+			isBreak = true;
 			isMainBreak = true;
 		}
 		
@@ -341,21 +354,22 @@ class HwTrainForExternal extends AsyncTask<Integer, String, Integer>
 			}
 			else if(hwName.equals("screen"))
 			{
-				this.ScreenTrain();
-				
+				this.ScreenTrain();	
 			}
 			else if(hwName.equals("gps"))
 			{
 				this.GPSTrain();
 			}
-			else if(hwName.equals("bluetooth")){
+			else if(hwName.equals("bluetooth"))
+			{
 				this.BluetoothTrain();
 			}
-			else if(hwName.equals("wifi")){
+			else if(hwName.equals("wifi"))
+			{
 				this.wifiTrain();
 			}
-			else {
-				
+			else 
+			{	
 			}
 			 
 	    	return 1;
@@ -401,7 +415,9 @@ class HwTrainForExternal extends AsyncTask<Integer, String, Integer>
 				gps.startGPS();
 			}
 			else if(arg1[0].equals("stop_gps")){
+				
 				gps.stopGPS();
+			
 			}
 			
 			if(arg1[0].contains("cpu_"))
